@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import "./style.css";
 import Image from "next/image";
 import { toast } from "react-toastify";
@@ -12,14 +12,17 @@ import {
 import {
   arrayUnion,
   collection,
-  doc,
   getDoc,
+  doc,
   getDocs,
+  onSnapshot,
   query,
   serverTimestamp,
   setDoc,
   updateDoc,
+  DocumentData,
   where,
+  Unsubscribe,
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { useUserStore } from "@/lib/userStore";
@@ -29,11 +32,11 @@ import { useChatStore } from "@/lib/chatStore";
 const ChatBot = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [chat, setChat] = useState<DocumentData | undefined>();
+  const [loading, setLoading] = useState<boolean>(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { currentUser, isLoading, fetchUserInfo } = useUserStore();
   const { myBot, isBotLoading, fetchBotInfo } = useUserBot();
-  const { chatId, changeChat } = useChatStore();
 
   // const auth = getAuth();
   // signOut(auth)
@@ -54,6 +57,24 @@ const ChatBot = () => {
       unSub();
     };
   }, [fetchUserInfo, fetchBotInfo]);
+
+  useEffect(() => {
+    let unsubscribe: Unsubscribe | undefined;
+    if (currentUser?.chatId) {
+      const chatDocRef = doc(db, "chats", currentUser.chatId);
+
+      // Subscribe to Firestore document changes
+      unsubscribe = onSnapshot(chatDocRef, (res) => {
+        setChat(res.data());
+      });
+    }
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe(); // Call the unsubscribe function
+      }
+    };
+  }, [currentUser?.chatId]);
 
   function removeForm() {
     if (formRef.current) {
@@ -76,17 +97,7 @@ const ChatBot = () => {
       );
       const user = userCredential.user;
 
-      // Automatically log in the user
-      await signInWithEmailAndPassword(auth, email, generatedPassword);
-      // Create user in Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        username: name,
-        email: email,
-        avatar: null,
-        id: user.uid,
-        blocked: [],
-      });
-
+      // Create a chatID for user
       try {
         const chatRef = collection(db, "chats");
         const newChatRef = doc(chatRef);
@@ -96,10 +107,20 @@ const ChatBot = () => {
           messages: [], // Default value: an empty array of messages
         });
 
-        changeChat(newChatRef.id);
+        await setDoc(doc(db, "users", user.uid), {
+          username: name,
+          email: email,
+          avatar: null,
+          id: user.uid,
+          chatId: newChatRef.id,
+          blocked: [],
+        });
       } catch (err) {
         console.log(err);
       }
+
+      // Automatically log in the user
+      await signInWithEmailAndPassword(auth, email, generatedPassword);
 
       removeForm();
       toast.success("Merci pour votre inscription 😊");
