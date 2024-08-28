@@ -1,22 +1,61 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./style.css";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import {
   createUserWithEmailAndPassword,
+  getAuth,
+  onAuthStateChanged,
   signInWithEmailAndPassword,
+  signOut,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import {
+  arrayUnion,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
+import { useUserStore } from "@/lib/userStore";
+import { useUserBot } from "@/lib/userBot";
+import { useChatStore } from "@/lib/chatStore";
 
 const ChatBot = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const { currentUser, isLoading, fetchUserInfo } = useUserStore();
+  const { myBot, isBotLoading, fetchBotInfo } = useUserBot();
+  const { chatId, changeChat } = useChatStore();
+
+  // const auth = getAuth();
+  // signOut(auth)
+  //   .then(() => {
+  //     console.log("User signed out");
+  //   })
+  //   .catch((e: Error) => {
+  //     console.log(e);
+  //   });
+
+  useEffect(() => {
+    const unSub = onAuthStateChanged(auth, (user) => {
+      fetchUserInfo(user?.uid);
+      fetchBotInfo();
+    });
+
+    return () => {
+      unSub();
+    };
+  }, [fetchUserInfo, fetchBotInfo]);
 
   function removeForm() {
-    // Handle post-login actions (e.g., redirect, show success message)
     if (formRef.current) {
       formRef.current.style.display = "none"; // Hide the form
     }
@@ -39,8 +78,7 @@ const ChatBot = () => {
 
       // Automatically log in the user
       await signInWithEmailAndPassword(auth, email, generatedPassword);
-
-      // Add user to Firestore collection
+      // Create user in Firestore
       await setDoc(doc(db, "users", user.uid), {
         username: name,
         email: email,
@@ -48,6 +86,20 @@ const ChatBot = () => {
         id: user.uid,
         blocked: [],
       });
+
+      try {
+        const chatRef = collection(db, "chats");
+        const newChatRef = doc(chatRef);
+
+        // Initialize the new chat document with default values
+        await setDoc(newChatRef, {
+          messages: [], // Default value: an empty array of messages
+        });
+
+        changeChat(newChatRef.id);
+      } catch (err) {
+        console.log(err);
+      }
 
       removeForm();
       toast.success("Merci pour votre inscription 😊");
@@ -103,8 +155,8 @@ const ChatBot = () => {
             <div className="flex flex-col gap-1 w-full max-w-[320px]">
               <div className="flex flex-col leading-1.5 p-4 border-gray-200 bg-slate-500 rounded-xl">
                 <p className="message own text-sm font-normal text-gray-900 dark:text-white">
-                  That's awesome. I think our users will really appreciate the
-                  improvements.
+                  That&apos;s awesome. I think our users will really appreciate
+                  the improvements.
                 </p>
               </div>
               <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
@@ -115,58 +167,62 @@ const ChatBot = () => {
         </div>
 
         {/* Form section */}
-        <form
-          className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-          onSubmit={handleSendEmail}
-          ref={formRef}
-        >
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="email"
-            >
-              Email
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline"
-              id="email"
-              type="email"
-              placeholder="Your email"
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="off"
-              required
-            />
-          </div>
-          <div className="mb-6">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="name"
-            >
-              Name
-            </label>
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-              id="name"
-              type="text"
-              placeholder="Enter your name"
-              onChange={(e) => setName(e.target.value)}
-              autoComplete="off"
-              required
-            />
-            <p className="text-secondary-500 text-xs italic">
-              Please enter your email and your name"
-            </p>
-          </div>
-          <div className="flex items-center justify-between">
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              type="submit"
-              disabled={loading}
-            >
-              {loading ? "Loading" : "Envoyer"}
-            </button>
-          </div>
-        </form>
+        {!currentUser ? (
+          <form
+            className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+            onSubmit={handleSendEmail}
+            ref={formRef}
+          >
+            <div className="mb-4">
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="email"
+              >
+                Email
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline"
+                id="email"
+                type="email"
+                placeholder="Your email"
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="off"
+                required
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="name"
+              >
+                Name
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                id="name"
+                type="text"
+                placeholder="Enter your name"
+                onChange={(e) => setName(e.target.value)}
+                autoComplete="off"
+                required
+              />
+              <p className="text-secondary-500 text-xs italic">
+                Please enter your email and your name
+              </p>
+            </div>
+            <div className="flex items-center justify-between">
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? "Loading" : "Envoyer"}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <></>
+        )}
 
         <div className="flex items-center pt-0">
           <form className="flex items-center justify-center w-full space-x-2">
