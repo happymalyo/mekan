@@ -16,7 +16,7 @@ const Users: React.FC = () => {
 
     fetchUsers();
   }, []);
-  console.log(users);
+  
   return (
     <div>
       <h1>Users</h1>

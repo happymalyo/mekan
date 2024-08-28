@@ -32,6 +32,7 @@ import { useChatStore } from "@/lib/chatStore";
 const ChatBot = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [text, setText] = useState("");
   const [chat, setChat] = useState<DocumentData | undefined>();
   const [loading, setLoading] = useState<boolean>(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -46,6 +47,28 @@ const ChatBot = () => {
   //   .catch((e: Error) => {
   //     console.log(e);
   //   });
+
+  const callFlaskApi = async (endpoint: string, data: any) => {
+    try {
+      const response = await fetch(`http://localhost:5000/${endpoint}`, {
+        method: "POST", // ou 'GET', 'PUT', etc., selon ce que votre API attend
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error("Error calling Flask API: ", error);
+      throw error;
+    }
+  };
 
   useEffect(() => {
     const unSub = onAuthStateChanged(auth, (user) => {
@@ -134,6 +157,34 @@ const ChatBot = () => {
     }
   };
 
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const data = { query: text };
+    if (text === "") return;
+
+    try {
+      await updateDoc(doc(db, "chats", currentUser?.chatId), {
+        messages: arrayUnion({
+          senderId: currentUser?.id,
+          text,
+          createdAt: new Date(),
+        }),
+      });
+      const result = await callFlaskApi("query", data);
+      await updateDoc(doc(db, "chats", currentUser?.chatId), {
+        messages: arrayUnion({
+          senderId: myBot?.id,
+          text: result,
+          createdAt: new Date(),
+        }),
+      });
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setText("");
+    }
+  };
+
   return (
     <>
       <div className="bot-container z-40 right-0 mr-4 text-slate-500 bg-white p-6 rounded-lg border border-[#e5e7eb] w-[440px] h-[634px] flex flex-col">
@@ -146,45 +197,37 @@ const ChatBot = () => {
           </p>
         </div>
         <div className="chat flex-1 space-y-2 pb-5">
-          <div className="center flex flex-row space-x-2">
-            <div>
-              <Image
-                className="item w-10 h-10 rounded-full"
-                src={"/favicon.ico"}
-                width={20}
-                height={20}
-                alt="Jese image"
-              />
-            </div>
-            <div className="flex flex-col gap-1 w-full max-w-[320px]">
-              <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                <span className="text-sm font-semibold text-gray-500">
-                  Bot.
-                </span>
-                <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                  11:46
-                </span>
+          {chat?.messages.map((message: any) => (
+            <>
+              <div className="center flex flex-row">
+                {message.senderId === myBot?.id ? (
+                  <div>
+                    <Image
+                      className="item w-10 h-10 rounded-full"
+                      src={"/favicon.ico"}
+                      width={20}
+                      height={20}
+                      alt="Jese image"
+                    />
+                  </div>
+                ) : (
+                  <></>
+                )}
+                <div
+                  className="flex flex-col gap-1 w-full max-w-[280px]"
+                  style={{
+                    marginLeft: message.senderId === myBot?.id ? 0 : 80,
+                  }}
+                >
+                  <div className="flex flex-col leading-1.5 p-5 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700">
+                    <p className="message text-sm font-normal text-gray-900 text-balance dark:text-white">
+                      {message.text}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-col leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700">
-                <p className="message text-sm font-normal text-gray-900 dark:text-white">
-                  Hi, how can I assist you?
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="center flex flex-row ml-20 space-x-2">
-            <div className="flex flex-col gap-1 w-full max-w-[320px]">
-              <div className="flex flex-col leading-1.5 p-4 border-gray-200 bg-slate-500 rounded-xl">
-                <p className="message own text-sm font-normal text-gray-900 dark:text-white">
-                  That&apos;s awesome. I think our users will really appreciate
-                  the improvements.
-                </p>
-              </div>
-              <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                11:46
-              </span>
-            </div>
-          </div>
+            </>
+          ))}
         </div>
 
         {/* Form section */}
@@ -246,14 +289,24 @@ const ChatBot = () => {
         )}
 
         <div className="flex items-center pt-0">
-          <form className="flex items-center justify-center w-full space-x-2">
+          <form
+            onSubmit={handleSend}
+            className="flex items-center justify-center w-full space-x-2"
+          >
             <input
               className="input h-10 text-gray-700 dark:text-gray-200 text-sm p-3 focus:outline-none bg-gray-200 dark:bg-gray-700 w-full rounded-l-md"
               type="text"
               placeholder="Type Messages"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              required
             />
 
-            <button className="inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2">
+            <button
+              disabled={!currentUser?.chatId}
+              type="submit"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2"
+            >
               Send
             </button>
           </form>

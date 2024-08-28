@@ -1,9 +1,14 @@
-import { collection, doc, getDocs, query, where } from "firebase/firestore";
+import { collection, doc, getDocs, query, where, DocumentData } from "firebase/firestore";
 import { create } from "zustand";
 import { db } from "./firebase";
+import { User } from "../types";
 
+
+interface botProps {
+
+}
 interface botStoreProps {
-  myBot: Object | null;
+  myBot: DocumentData | User | null;
   isBotLoading: boolean;
   fetchBotInfo: () => void;
 }
@@ -16,7 +21,6 @@ export const useUserBot = create<botStoreProps>((set) => ({
     const q = query(userRef, where("username", "==", "Bot."));
     try {
       const docSnap = await getDocs(q);
-      console.log(docSnap.docs[0].data());
 
       if (!docSnap.empty) {
         set({ myBot: docSnap.docs[0].data(), isBotLoading: false });

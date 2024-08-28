@@ -1,19 +1,12 @@
 import { doc, getDoc, DocumentData } from "firebase/firestore";
 import { create } from "zustand";
 import { db } from "./firebase";
+import { User } from "../types";
 
-interface User {
-  username: string,
-  email: string,
-  avatar ?: null,
-  id: string,
-  chatId : string,
-  blocked ?: string[],
-}
 interface userStoreProps {
-  currentUser : DocumentData | User | null ;
+  currentUser: DocumentData | User | null;
   isLoading: boolean;
-  fetchUserInfo: (uid? : string ) => void;
+  fetchUserInfo: (uid?: string) => void;
 }
 
 export const useUserStore = create<userStoreProps>((set) => ({
