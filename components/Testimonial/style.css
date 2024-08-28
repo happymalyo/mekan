@@ -1,0 +1,31 @@
+
+
+.slick-initialized .slick-slide {
+  color: #fff;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slick-slider .slick-dots button:before {
+    font-size: .8rem;
+    color: #1E3967;
+    opacity: 1;
+  }
+  
+  .slick-slider .slick-dots li.slick-active button::before {
+    color: #FFCF1E;
+  }
+  .slick-slider .slick-dots {
+    bottom: -44px;
+    right: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .slick-slider .slick-dots li {
+    margin: 0 0.5rem;
+  }
