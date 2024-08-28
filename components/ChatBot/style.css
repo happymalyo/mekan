@@ -1,3 +1,21 @@
-.chatbot {
-  background-color: brown;
+.bot-container {
+  position: fixed;
+  bottom: 15px;
+}
+
+.chat {
+  overflow-y: auto;
+}
+
+.chat::-webkit-scrollbar {
+  width: 0.3em;
+}
+
+.chat::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+.chat::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
 }
