@@ -1,9 +1,10 @@
-import { collection, doc, getDocs, query, where } from "firebase/firestore";
+import { collection, doc, DocumentData, getDocs, query, where } from "firebase/firestore";
 import { create } from "zustand";
 import { db } from "./firebase";
+import { User } from "@/types";
 
 interface botStoreProps {
-  myBot: Object | null;
+  myBot: User | DocumentData | null;
   isBotLoading: boolean;
   fetchBotInfo: () => void;
 }

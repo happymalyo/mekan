@@ -131,9 +131,7 @@ export const Home = () => {
           </div>
         </div>
       </section>
-      <section>
-        <ChatBot />
-      </section>
+      <section>{/* <ChatBot /> */}</section>
     </>
   );
 };

@@ -7,6 +7,7 @@ import HeaderMobile from "@/components/site-header-mobile";
 import Footer from "@/components/site-footer";
 import { cn } from "@/lib/utils";
 import { NextIntlClientProvider, useMessages } from "next-intl";
+import BotSupport from "@/components/BotSupport/BotSupport";
 
 const manrope = Manrope({ subsets: ["latin"] });
 
@@ -46,6 +47,7 @@ export default function RootLayout({
               <Footer />
             </div>
           </NextIntlClientProvider>
+          <BotSupport />
         </ThemeProvider>
       </body>
     </html>

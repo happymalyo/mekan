@@ -9,3 +9,11 @@ export type MenuIntl = {
 };
 
 export type Lang = "en" | "fr";
+export type User = {
+  username: string,
+  email: string,
+  avatar ?: null,
+  id: string,
+  chatId : string,
+  blocked ?: string[],
+}

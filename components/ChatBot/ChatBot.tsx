@@ -29,6 +29,7 @@ import { useUserStore } from "@/lib/userStore";
 import { useUserBot } from "@/lib/userBot";
 import { useChatStore } from "@/lib/chatStore";
 
+
 const ChatBot = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -101,6 +102,7 @@ const ChatBot = () => {
       try {
         const chatRef = collection(db, "chats");
         const newChatRef = doc(chatRef);
+        const userChatsRef = collection(db, "userchats");
 
         // Initialize the new chat document with default values
         await setDoc(newChatRef, {
@@ -115,13 +117,22 @@ const ChatBot = () => {
           chatId: newChatRef.id,
           blocked: [],
         });
+
+        await setDoc(doc(userChatsRef, myBot?.id), {
+          chats: arrayUnion({
+            chatId: newChatRef.id,
+            lastMessage: "",
+            receiverId: user.uid,
+            updatedAt: Date.now(),
+          }),
+        });
+
       } catch (err) {
         console.log(err);
       }
 
       // Automatically log in the user
       await signInWithEmailAndPassword(auth, email, generatedPassword);
-
       removeForm();
       toast.success("Merci pour votre inscription 😊");
     } catch (error) {
