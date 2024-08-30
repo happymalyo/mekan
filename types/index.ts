@@ -18,3 +18,4 @@ export type  User = {
   chatId : string,
   blocked ?: string[];
 }
+

@@ -4,9 +4,6 @@ import { db } from "./firebase";
 import { User } from "../types";
 
 
-interface botProps {
-
-}
 interface botStoreProps {
   myBot: DocumentData | User | null;
   isBotLoading: boolean;

@@ -28,6 +28,13 @@ import { auth, db } from "@/lib/firebase";
 import { useUserStore } from "@/lib/userStore";
 import { useUserBot } from "@/lib/userBot";
 import { useChatStore } from "@/lib/chatStore";
+import { useLeadInfos } from "@/lib/leadInfos";
+
+interface MyFormProps {
+  handleSendEmail: (event: React.FormEvent<HTMLFormElement>) => void;
+  handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  loadingState: boolean;
+}
 
 const ChatBot = () => {
   const [email, setEmail] = useState("");
@@ -38,15 +45,11 @@ const ChatBot = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const { currentUser, isLoading, fetchUserInfo } = useUserStore();
   const { myBot, isBotLoading, fetchBotInfo } = useUserBot();
-
-  // const auth = getAuth();
-  // signOut(auth)
-  //   .then(() => {
-  //     console.log("User signed out");
-  //   })
-  //   .catch((e: Error) => {
-  //     console.log(e);
-  //   });
+  const { leadId, chatId, fetchLeadInfo } = useLeadInfos();
+  const [isVisitorCreated, setNewVisitor] = useState(false);
+  const BOT_ID = `${process.env.NEXT_PUBLIC_BOT_ID}`;
+  const [formData, setFormData] = useState({ name: "", email: "" });
+  const endRef = useRef<HTMLDivElement>(null);
 
   const callFlaskApi = async (endpoint: string, data: any) => {
     try {
@@ -71,20 +74,22 @@ const ChatBot = () => {
   };
 
   useEffect(() => {
-    const unSub = onAuthStateChanged(auth, (user) => {
-      fetchUserInfo(user?.uid);
-      fetchBotInfo();
-    });
-
+    fetchLeadInfo?.();
     return () => {
-      unSub();
+      console.log("clean up");
     };
-  }, [fetchUserInfo, fetchBotInfo]);
+  }, [fetchLeadInfo]);
+
+  useEffect(() => {
+    if (endRef.current) {
+      endRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  }, [chat?.messages]);
 
   useEffect(() => {
     let unsubscribe: Unsubscribe | undefined;
-    if (currentUser?.chatId) {
-      const chatDocRef = doc(db, "chats", currentUser.chatId);
+    if (chatId) {
+      const chatDocRef = doc(db, "chats", chatId);
 
       // Subscribe to Firestore document changes
       unsubscribe = onSnapshot(chatDocRef, (res) => {
@@ -97,84 +102,63 @@ const ChatBot = () => {
         unsubscribe(); // Call the unsubscribe function
       }
     };
-  }, [currentUser?.chatId]);
-
-  function removeForm() {
-    if (formRef.current) {
-      formRef.current.style.display = "none"; // Hide the form
-    }
-  }
+  }, [`${chatId}`]);
 
   const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
+    const { name, email } = formData;
     setLoading(true);
-    // Generate a simple password (for example, the email plus a fixed string)
-    const generatedPassword = email + "12345";
-
     try {
-      // Create user in Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
+      await updateDoc(doc(db, "users", `${leadId}`), {
         email,
-        generatedPassword
+        username: name,
+      });
+
+      toast.success(
+        "L'email a été envoyé avec succès. Nous allons vous contacter sous peu.😊"
       );
-      const user = userCredential.user;
-
-      // Create a chatID for user
-      try {
-        const chatRef = collection(db, "chats");
-        const newChatRef = doc(chatRef);
-
-        // Initialize the new chat document with default values
-        await setDoc(newChatRef, {
-          messages: [], // Default value: an empty array of messages
-        });
-
-        await setDoc(doc(db, "users", user.uid), {
-          username: name,
-          email: email,
-          avatar: null,
-          id: user.uid,
-          chatId: newChatRef.id,
-          blocked: [],
-        });
-      } catch (err) {
-        console.log(err);
-      }
-
-      // Automatically log in the user
-      await signInWithEmailAndPassword(auth, email, generatedPassword);
-
-      removeForm();
-      toast.success("Merci pour votre inscription 😊");
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
-      removeForm();
-      toast.success(`Yooop! Welcome back ${name} 😊`);
-      console.error("Error creating user: ", error);
+      toast.error(
+        "L'email n'a pas été envoyé correctement. Veuillez réessayer plus tard."
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
+    setText("Loading....");
     const data = { query: text };
+    let result = "";
     if (text === "") return;
 
     try {
-      await updateDoc(doc(db, "chats", currentUser?.chatId), {
+      await updateDoc(doc(db, "chats", `${chatId}`), {
         messages: arrayUnion({
-          senderId: currentUser?.id,
+          senderId: `${leadId}`,
           text,
           createdAt: new Date(),
         }),
       });
-      const result = await callFlaskApi("query", data);
-      await updateDoc(doc(db, "chats", currentUser?.chatId), {
+      try {
+        result = await callFlaskApi("query", data);
+      } catch (err) {
+        console.log(err);
+      }
+      await updateDoc(doc(db, "chats", `${chatId}`), {
         messages: arrayUnion({
-          senderId: myBot?.id,
-          text: result,
+          senderId: BOT_ID,
+          text:
+            result === ""
+              ? "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous."
+              : result,
           createdAt: new Date(),
         }),
       });
@@ -188,20 +172,36 @@ const ChatBot = () => {
   return (
     <>
       <div className="bot-container z-40 right-0 mr-4 text-slate-500 bg-white p-6 rounded-lg border border-[#e5e7eb] w-[440px] h-[634px] flex flex-col">
-        <div className="flex flex-col space-y-1.5 pb-6">
-          <h2 className="font-semibold text-lg tracking-tight">
-            <u>Welcome</u> back 👋
+        <div className="flex flex-col space-y-1.5 pb-4">
+          <h2 className="font-semibold text-lg pb-5 tracking-tight border-b">
+            SmartPredict Service
           </h2>
-          <p className="text-sm text-[#6b7280] leading-3">
-            <br />
-          </p>
         </div>
         <div className="chat flex-1 space-y-2 pb-5">
-          {chat?.messages.map((message: any) => (
+          <div className="center flex flex-row">
+            <div className="space-y-2">
+              <Image
+                className="item w-10 h-10 rounded-full"
+                src={"/favicon.ico"}
+                width={20}
+                height={20}
+                alt="Jese image"
+              />
+            </div>
+            <div className="flex flex-col gap-2 w-full max-w-[280px]">
+              <div className="flex flex-col leading-1.5 p-5 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700">
+                <p className="message text-sm font-normal text-gray-900 text-balance dark:text-white">
+                  Bonjour 👋, je suis un bot de Smartpredict. Je peux vous
+                  répondre instatannement.
+                </p>
+              </div>
+            </div>
+          </div>
+          {chat?.messages?.map((message: any, index: number) => (
             <>
               <div className="center flex flex-row">
-                {message.senderId === myBot?.id ? (
-                  <div>
+                {message.senderId === BOT_ID ? (
+                  <div className="space-y-2">
                     <Image
                       className="item w-10 h-10 rounded-full"
                       src={"/favicon.ico"}
@@ -216,78 +216,29 @@ const ChatBot = () => {
                 <div
                   className="flex flex-col gap-1 w-full max-w-[280px]"
                   style={{
-                    marginLeft: message.senderId === myBot?.id ? 0 : 80,
+                    marginLeft: message.senderId === BOT_ID ? 0 : 80,
                   }}
                 >
                   <div className="flex flex-col leading-1.5 p-5 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700">
                     <p className="message text-sm font-normal text-gray-900 text-balance dark:text-white">
-                      {message.text}
+                      <div dangerouslySetInnerHTML={{ __html: message.text }} />
                     </p>
                   </div>
+                  {chat?.messages?.length === 4 &&
+                  index === chat?.messages?.length - 1 &&
+                  message.senderId === BOT_ID ? (
+                    <EmailForm
+                      handleSendEmail={handleSendEmail}
+                      handleChange={handleChange}
+                      loadingState={loading}
+                    />
+                  ) : null}
                 </div>
               </div>
+              <div ref={endRef} />
             </>
           ))}
         </div>
-
-        {/* Form section */}
-        {!currentUser ? (
-          <form
-            className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-            onSubmit={handleSendEmail}
-            ref={formRef}
-          >
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="email"
-              >
-                Email
-              </label>
-              <input
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline"
-                id="email"
-                type="email"
-                placeholder="Your email"
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="off"
-                required
-              />
-            </div>
-            <div className="mb-6">
-              <label
-                className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="name"
-              >
-                Name
-              </label>
-              <input
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-                id="name"
-                type="text"
-                placeholder="Enter your name"
-                onChange={(e) => setName(e.target.value)}
-                autoComplete="off"
-                required
-              />
-              <p className="text-secondary-500 text-xs italic">
-                Please enter your email and your name
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? "Loading" : "Envoyer"}
-              </button>
-            </div>
-          </form>
-        ) : (
-          <></>
-        )}
-
         <div className="flex items-center pt-0">
           <form
             onSubmit={handleSend}
@@ -303,7 +254,6 @@ const ChatBot = () => {
             />
 
             <button
-              disabled={!currentUser?.chatId}
               type="submit"
               className="inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2"
             >
@@ -313,6 +263,76 @@ const ChatBot = () => {
         </div>
       </div>
     </>
+  );
+};
+
+const EmailForm: React.FC<MyFormProps> = ({
+  handleSendEmail,
+  handleChange,
+  loadingState,
+}) => {
+  return (
+    <div className="gap-2">
+      <div className="flex flex-col mb-5 leading-1.5 p-5 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700">
+        <p className="message text-sm font-normal text-gray-900 text-balance dark:text-white">
+          Laisser nous votre contact et nous allons vous contacter quand vous
+          n'êtes pas connecté
+        </p>
+      </div>
+      <form
+        className="bg-white shadow-md w-50 h-200 rounded px-8 pt-6 pb-8 mb-4"
+        onSubmit={handleSendEmail}
+      >
+        <div className="mb-4">
+          <label
+            className="text-gray-700 text-sm font-bold mb-2"
+            htmlFor="email"
+          >
+            Email
+          </label>
+          <input
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline"
+            id="email"
+            type="email"
+            name="email"
+            placeholder="Your email"
+            onChange={handleChange}
+            autoComplete="off"
+            required
+          />
+        </div>
+        <div className="mb-6">
+          <label
+            className="text-gray-700 text-sm font-bold mb-2"
+            htmlFor="name"
+          >
+            Name
+          </label>
+          <input
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+            id="name"
+            type="text"
+            name="name"
+            placeholder="Enter your name"
+            onChange={handleChange}
+            autoComplete="off"
+            required
+          />
+          <p className="text-secondary-500 text-xs italic">
+            Please enter your email and your name
+          </p>
+        </div>
+        <div className="flex items-center justify-between">
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            type="submit"
+            disabled={loadingState}
+          >
+            {loadingState ? "Loading" : "Envoyer"}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 
