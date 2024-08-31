@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
 import { User } from "@/types";
-import { doc, DocumentData, setDoc } from "firebase/firestore";
+import { arrayUnion, doc, DocumentData, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 interface LeadInfoState {
@@ -57,8 +57,15 @@ export const useLeadInfos = create<LeadInfoState>((set) => ({
           messages: [],
         });
 
-        await setDoc(doc(db, "userchats", `${BOT_ID}`), {
-          chat: [{ chatId, receiverId: leadId, updatedAt: Date.now() }],
+        await updateDoc(doc(db, "userchats", `${BOT_ID}`), {
+          chats: arrayUnion({
+            chatId,
+              isSeen: false,
+              lastMessage: "",
+              receiverId: leadId,
+              updatedAt: Date.now(),
+          }),
+          
         });
       } catch (error) {
         console.log(error);

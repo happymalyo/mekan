@@ -160,17 +160,37 @@ const ChatBot = () => {
       try {
         result = await callFlaskApi("query", data);
       } catch (err) {
+        result = "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous.";
         console.log(err);
       }
       await updateDoc(doc(db, "chats", `${chatId}`), {
         messages: arrayUnion({
           senderId: BOT_ID,
-          text:
-            result === ""
-              ? "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous."
-              : result,
+          text: result === "" ? "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous." : result,
           createdAt: new Date(),
         }),
+      });
+      const userIDs = [BOT_ID, `${leadId}`];
+
+      userIDs.forEach(async (id) => {
+        const userChatsRef = doc(db, "userchats", `${id}`);
+        const userChatsSnapshot = await getDoc(userChatsRef);
+
+        if (userChatsSnapshot.exists()) {
+          const userChatsData = userChatsSnapshot.data();
+
+          const chatIndex = userChatsData.chats.findIndex(
+            (c: any) => c.chatId === chatId
+          );
+
+          userChatsData.chats[chatIndex].lastMessage = result;
+          userChatsData.chats[chatIndex].isSeen = id === BOT_ID ? true : false;
+          userChatsData.chats[chatIndex].updatedAt = Date.now();
+
+          await updateDoc(userChatsRef, {
+            chats: userChatsData.chats,
+          });
+        }
       });
     } catch (err) {
       console.log(err);
@@ -197,6 +217,7 @@ const ChatBot = () => {
       try {
         result = await callFlaskApi("query", data);
       } catch (err) {
+        result = "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous.";
         setText("");
         console.log(err);
       }
@@ -209,6 +230,29 @@ const ChatBot = () => {
               : result,
           createdAt: new Date(),
         }),
+      });
+
+      const userIDs = [BOT_ID, leadId];
+
+      userIDs.forEach(async (id) => {
+        const userChatsRef = doc(db, "userchats", `${id}`);
+        const userChatsSnapshot = await getDoc(userChatsRef);
+
+        if (userChatsSnapshot.exists()) {
+          const userChatsData = userChatsSnapshot.data();
+
+          const chatIndex = userChatsData.chats.findIndex(
+            (c: any) => c.chatId === chatId
+          );
+
+          userChatsData.chats[chatIndex].lastMessage = result;
+          userChatsData.chats[chatIndex].isSeen = id === BOT_ID ? true : false;
+          userChatsData.chats[chatIndex].updatedAt = Date.now();
+
+          await updateDoc(userChatsRef, {
+            chats: userChatsData.chats,
+          });
+        }
       });
     } catch (err) {
       console.log(err);
