@@ -245,8 +245,8 @@ const ChatBot = () => {
       >
         {isOpen && (
           <>
-            <div className="flex flex-col w-full space-y-1.5 pb-4">
-              <div className="pr-2 pb-5 border-b flex items-center justify-between">
+            <div className="flex flex-col w-full space-y-1.5 pb-4 border-b shadow-md border-none">
+              <div className="pr-2  flex items-center justify-between">
                 <h2 className="font-semibold text-lg tracking-tight">
                   SmartPredict Service
                 </h2>
@@ -259,7 +259,7 @@ const ChatBot = () => {
                 />
               </div>
             </div>
-            <div className="chat flex-1 w-full space-y-2 pb-5">
+            <div className="chat flex-1 w-full space-y-2 pt-5 pb-5">
               <div className="center flex flex-row">
                 <div className="space-y-2">
                   <Image
