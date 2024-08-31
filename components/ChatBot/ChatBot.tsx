@@ -2,6 +2,7 @@ import React, { use, useEffect, useRef, useState } from "react";
 import "./style.css";
 import Image from "next/image";
 import { toast } from "react-toastify";
+import { FiMinus } from "react-icons/fi";
 import {
   createUserWithEmailAndPassword,
   getAuth,
@@ -29,11 +30,17 @@ import { useUserStore } from "@/lib/userStore";
 import { useUserBot } from "@/lib/userBot";
 import { useChatStore } from "@/lib/chatStore";
 import { useLeadInfos } from "@/lib/leadInfos";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface MyFormProps {
   handleSendEmail: (event: React.FormEvent<HTMLFormElement>) => void;
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   loadingState: boolean;
+}
+
+interface MyPresetQuestionProps {
+  handlePresetQuestion: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
 const ChatBot = () => {
@@ -50,6 +57,9 @@ const ChatBot = () => {
   const BOT_ID = `${process.env.NEXT_PUBLIC_BOT_ID}`;
   const [formData, setFormData] = useState({ name: "", email: "" });
   const endRef = useRef<HTMLDivElement>(null);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [isDiplayed, setIsDisplayed] = useState(true);
 
   const callFlaskApi = async (endpoint: string, data: any) => {
     try {
@@ -84,7 +94,7 @@ const ChatBot = () => {
     if (endRef.current) {
       endRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
     }
-  }, [chat?.messages]);
+  }, [chat?.messages, isOpen]);
 
   useEffect(() => {
     let unsubscribe: Unsubscribe | undefined;
@@ -102,7 +112,7 @@ const ChatBot = () => {
         unsubscribe(); // Call the unsubscribe function
       }
     };
-  }, [`${chatId}`]);
+  }, [chatId]);
 
   const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +144,7 @@ const ChatBot = () => {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    setText("Loading....");
+    setText("Traitement en cours....");
     const data = { query: text };
     let result = "";
     if (text === "") return;
@@ -169,100 +179,192 @@ const ChatBot = () => {
     }
   };
 
+  const handlePresetQuestion = async (e: React.MouseEvent<HTMLElement>) => {
+    const target = e.target as HTMLElement;
+    setText("Traitement en cours....");
+    const data = { query: text };
+    let result = "";
+
+    try {
+      await updateDoc(doc(db, "chats", `${chatId}`), {
+        messages: arrayUnion({
+          senderId: leadId,
+          text: `${target?.textContent}`,
+          createdAt: new Date(),
+        }),
+      });
+
+      try {
+        result = await callFlaskApi("query", data);
+      } catch (err) {
+        setText("");
+        console.log(err);
+      }
+      await updateDoc(doc(db, "chats", `${chatId}`), {
+        messages: arrayUnion({
+          senderId: BOT_ID,
+          text:
+            result === ""
+              ? "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous."
+              : result,
+          createdAt: new Date(),
+        }),
+      });
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setText("");
+    }
+  };
+
   return (
-    <>
-      <div className="bot-container z-40 right-0 mr-4 text-slate-500 bg-white p-6 rounded-lg border border-[#e5e7eb] w-[440px] h-[634px] flex flex-col">
-        <div className="flex flex-col space-y-1.5 pb-4">
-          <h2 className="font-semibold text-lg pb-5 tracking-tight border-b">
-            SmartPredict Service
-          </h2>
-        </div>
-        <div className="chat flex-1 space-y-2 pb-5">
-          <div className="center flex flex-row">
-            <div className="space-y-2">
-              <Image
-                className="item w-10 h-10 rounded-full"
-                src={"/favicon.ico"}
-                width={20}
-                height={20}
-                alt="Jese image"
-              />
-            </div>
-            <div className="flex flex-col gap-2 w-full max-w-[280px]">
-              <div className="flex flex-col leading-1.5 p-5 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700">
-                <p className="message text-sm font-normal text-gray-900 text-balance dark:text-white">
-                  Bonjour 👋, je suis un bot de Smartpredict. Je peux vous
-                  répondre instatannement.
-                </p>
+    <div
+      className={cn({
+        "fixed bottom-14 right-5 z-20": !isOpen,
+      })}
+    >
+      <motion.div
+        layout // Layout make the div more smooth
+        animate={{
+          borderRadius: isOpen ? 20 : 50,
+        }}
+        initial={{ borderRadius: 50 }}
+        className={cn(
+          "w-20 h-20 bg-zinc-700 shadow-2xl cursor-pointer flex items-center justify-center",
+          {
+            "bot-container z-40 right-0 mr-4 text-slate-500 bg-white p-6 rounded-lg border border-[#e5e7eb] w-[440px] h-[634px] flex flex-col":
+              isOpen,
+          }
+        )}
+        onClick={() => {
+          if (!isOpen) {
+            setIsOpen(!isOpen);
+            setIsDisplayed(false);
+          }
+        }}
+      >
+        {isOpen && (
+          <>
+            <div className="flex flex-col w-full space-y-1.5 pb-4">
+              <div className="pr-2 pb-5 border-b flex items-center justify-between">
+                <h2 className="font-semibold text-lg tracking-tight">
+                  SmartPredict Service
+                </h2>
+                <FiMinus
+                  className="w-8 h-8 cursor-pointer"
+                  onClick={() => {
+                    setIsOpen(false);
+                    setIsDisplayed(true);
+                  }}
+                />
               </div>
             </div>
-          </div>
-          {chat?.messages?.map((message: any, index: number) => (
-            <>
+            <div className="chat flex-1 w-full space-y-2 pb-5">
               <div className="center flex flex-row">
-                {message.senderId === BOT_ID ? (
-                  <div className="space-y-2">
-                    <Image
-                      className="item w-10 h-10 rounded-full"
-                      src={"/favicon.ico"}
-                      width={20}
-                      height={20}
-                      alt="Jese image"
-                    />
-                  </div>
-                ) : (
-                  <></>
-                )}
-                <div
-                  className="flex flex-col gap-1 w-full max-w-[280px]"
-                  style={{
-                    marginLeft: message.senderId === BOT_ID ? 0 : 80,
-                  }}
+                <div className="space-y-2">
+                  <Image
+                    className="item w-10 h-10 rounded-full"
+                    src={"/favicon.ico"}
+                    width={20}
+                    height={20}
+                    alt="Jese image"
+                  />
+                </div>
+                <motion.div
+                  className="flex flex-col gap-2 w-full"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.5 }}
                 >
                   <div className="flex flex-col leading-1.5 p-5 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700">
                     <p className="message text-sm font-normal text-gray-900 text-balance dark:text-white">
-                      <div dangerouslySetInnerHTML={{ __html: message.text }} />
+                      Bonjour 👋, je suis un bot de Smartpredict. Je peux vous
+                      répondre instatannement.
                     </p>
                   </div>
-                  {chat?.messages?.length === 4 &&
-                  index === chat?.messages?.length - 1 &&
-                  message.senderId === BOT_ID ? (
-                    <EmailForm
-                      handleSendEmail={handleSendEmail}
-                      handleChange={handleChange}
-                      loadingState={loading}
-                    />
-                  ) : null}
-                </div>
+                  <PresetQuestion handlePresetQuestion={handlePresetQuestion} />
+                </motion.div>
               </div>
-              <div ref={endRef} />
-            </>
-          ))}
-        </div>
-        <div className="flex items-center pt-0">
-          <form
-            onSubmit={handleSend}
-            className="flex items-center justify-center w-full space-x-2"
-          >
-            <input
-              className="input h-10 text-gray-700 dark:text-gray-200 text-sm p-3 focus:outline-none bg-gray-200 dark:bg-gray-700 w-full rounded-l-md"
-              type="text"
-              placeholder="Type Messages"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              required
-            />
+              {chat?.messages?.map((message: any, index: number) => (
+                <>
+                  <div className="center flex flex-row">
+                    {message.senderId === BOT_ID ? (
+                      <div className="space-y-2">
+                        <Image
+                          className="item w-10 h-10 rounded-full"
+                          src={"/favicon.ico"}
+                          width={20}
+                          height={20}
+                          alt="Jese image"
+                        />
+                      </div>
+                    ) : (
+                      <></>
+                    )}
+                    <div
+                      className="flex flex-col gap-1 w-full max-w-[280px]"
+                      style={{
+                        marginLeft: message.senderId === BOT_ID ? 0 : 80,
+                      }}
+                    >
+                      <div className="flex flex-col leading-1.5 p-5 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700">
+                        <p className="message text-sm font-normal text-gray-900 text-balance dark:text-white">
+                          <div
+                            dangerouslySetInnerHTML={{ __html: message.text }}
+                          />
+                        </p>
+                      </div>
+                      {chat?.messages?.length === 4 &&
+                      index === chat?.messages?.length - 1 &&
+                      message.senderId === BOT_ID ? (
+                        <EmailForm
+                          handleSendEmail={handleSendEmail}
+                          handleChange={handleChange}
+                          loadingState={loading}
+                        />
+                      ) : null}
+                    </div>
+                  </div>
+                  <div ref={endRef} />
+                </>
+              ))}
+            </div>
+            <div className="flex items-center w-full pt-0">
+              <form
+                onSubmit={handleSend}
+                className="flex items-center justify-center w-full space-x-2"
+              >
+                <input
+                  className="input h-10 text-gray-700 dark:text-gray-200 text-sm p-3 focus:outline-none bg-gray-200 dark:bg-gray-700 w-full rounded-l-md"
+                  type="text"
+                  placeholder="Type Messages"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  required
+                />
 
-            <button
-              type="submit"
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2"
-            >
-              Send
-            </button>
-          </form>
-        </div>
-      </div>
-    </>
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2"
+                >
+                  Send
+                </button>
+              </form>
+            </div>
+          </>
+        )}
+
+        {isDiplayed && (
+          <Image
+            className="item w-10 h-10 rounded-full"
+            src={"/favicon.ico"}
+            width={20}
+            height={20}
+            alt="Jese image"
+          />
+        )}
+      </motion.div>
+    </div>
   );
 };
 
@@ -275,8 +377,8 @@ const EmailForm: React.FC<MyFormProps> = ({
     <div className="gap-2">
       <div className="flex flex-col mb-5 leading-1.5 p-5 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700">
         <p className="message text-sm font-normal text-gray-900 text-balance dark:text-white">
-          Laisser nous votre contact et nous allons vous contacter quand vous
-          n'êtes pas connecté
+          Laisser nous votre contact et nous allons vous contacter quand vous n
+          êtes pas connecté
         </p>
       </div>
       <form
@@ -333,6 +435,36 @@ const EmailForm: React.FC<MyFormProps> = ({
         </div>
       </form>
     </div>
+  );
+};
+
+const PresetQuestion: React.FC<MyPresetQuestionProps> = ({
+  handlePresetQuestion,
+}) => {
+  return (
+    <motion.div className="cursor-pointer space-y-1">
+      <h1
+        className="bg-zinc-900 inline-block text-gray-100
+       p-3 mr-1 rounded-md hover:tracking-wider transition-all"
+        onClick={handlePresetQuestion}
+      >
+        En quoi consiste votre expertise en intelligence artificielle (IA) ?
+      </h1>
+      <h1
+        className="bg-zinc-900 inline-block text-gray-100
+       p-3 rounded-md hover:tracking-wider transition-all"
+        onClick={handlePresetQuestion}
+      >
+        Combien de temps vous faut-il pour fournir un devis?
+      </h1>
+      <h1
+        className="bg-zinc-900 inline-block text-gray-100
+       p-3 rounded-md hover:tracking-wider transition-all"
+        onClick={handlePresetQuestion}
+      >
+        Quels sont vos modes de prestations?
+      </h1>
+    </motion.div>
   );
 };
 
