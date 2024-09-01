@@ -160,13 +160,17 @@ const ChatBot = () => {
       try {
         result = await callFlaskApi("query", data);
       } catch (err) {
-        result = "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous.";
+        result =
+          "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous.";
         console.log(err);
       }
       await updateDoc(doc(db, "chats", `${chatId}`), {
         messages: arrayUnion({
           senderId: BOT_ID,
-          text: result === "" ? "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous." : result,
+          text:
+            result === ""
+              ? "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous."
+              : result,
           createdAt: new Date(),
         }),
       });
@@ -202,7 +206,7 @@ const ChatBot = () => {
   const handlePresetQuestion = async (e: React.MouseEvent<HTMLElement>) => {
     const target = e.target as HTMLElement;
     setText("Traitement en cours....");
-    const data = { query: text };
+    const data = { query: target?.textContent };
     let result = "";
 
     try {
@@ -217,7 +221,8 @@ const ChatBot = () => {
       try {
         result = await callFlaskApi("query", data);
       } catch (err) {
-        result = "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous.";
+        result =
+          "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous.";
         setText("");
         console.log(err);
       }
@@ -290,8 +295,8 @@ const ChatBot = () => {
         {isOpen && (
           <>
             <div className="flex flex-col w-full space-y-1.5 pb-4 border-b shadow-md border-none">
-              <div className="pr-2  flex items-center justify-between">
-                <h2 className="font-semibold text-lg tracking-tight">
+              <div className="px-2  flex items-center justify-between">
+                <h2 className="flex font-semibold text-lg tracking-tight items-center">
                   SmartPredict Service
                 </h2>
                 <FiMinus
@@ -357,6 +362,15 @@ const ChatBot = () => {
                             dangerouslySetInnerHTML={{ __html: message.text }}
                           />
                         </p>
+                        {message.img && (
+                          <img
+                            className="mt-5 item w-100 h-100"
+                            src={message.img}
+                            width={100}
+                            height={100}
+                            alt="Jese image"
+                          />
+                        )}
                       </div>
                       {chat?.messages?.length === 4 &&
                       index === chat?.messages?.length - 1 &&
