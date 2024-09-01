@@ -395,7 +395,7 @@ const ChatBot = () => {
                 <input
                   className="input h-10 text-gray-700 dark:text-gray-200 text-sm p-3 focus:outline-none bg-gray-200 dark:bg-gray-700 w-full rounded-l-md"
                   type="text"
-                  placeholder="Type Messages"
+                  placeholder="Ecrire un message"
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   required
@@ -405,7 +405,7 @@ const ChatBot = () => {
                   type="submit"
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2"
                 >
-                  Send
+                  Envoyer
                 </button>
               </form>
             </div>
