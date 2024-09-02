@@ -57,7 +57,6 @@ const ChatBot = () => {
   const BOT_ID = `${process.env.NEXT_PUBLIC_BOT_ID}`;
   const [formData, setFormData] = useState({ name: "", email: "" });
   const endRef = useRef<HTMLDivElement>(null);
-  const [phone, setPhone] = useState("+261344432719");
   const [isOpen, setIsOpen] = useState(false);
   const [isDiplayed, setIsDisplayed] = useState(true);
 
@@ -140,7 +139,7 @@ const ChatBot = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          phone: phone,
+          phone: process.env.NEXT_PUBLIC_TWILIO_PHONE_ADMIN as string,
           message: `Email a été envoyé dans le chat. Voici l'information du prospect, Email : ${email}. Nom : ${name}.`,
         }),
       });
