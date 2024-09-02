@@ -134,6 +134,16 @@ const ChatBot = () => {
       );
     } finally {
       setLoading(false);
+      const res = await fetch("/en/api/sendMessage", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone: phone,
+          message: `Email a été envoyé dans le chat. Voici l'information du prospect, Email : ${email}. Nom : ${name}.`,
+        }),
+      });
     }
   };
 
@@ -141,6 +151,9 @@ const ChatBot = () => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
+
+  const [phone, setPhone] = useState("+261344432719");
+  const [message, setMessage] = useState("Kaiza kaiza");
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,13 +173,17 @@ const ChatBot = () => {
       try {
         result = await callFlaskApi("query", data);
       } catch (err) {
-        result = "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous.";
+        result =
+          "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous.";
         console.log(err);
       }
       await updateDoc(doc(db, "chats", `${chatId}`), {
         messages: arrayUnion({
           senderId: BOT_ID,
-          text: result === "" ? "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous." : result,
+          text:
+            result === ""
+              ? "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous."
+              : result,
           createdAt: new Date(),
         }),
       });
@@ -217,7 +234,8 @@ const ChatBot = () => {
       try {
         result = await callFlaskApi("query", data);
       } catch (err) {
-        result = "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous.";
+        result =
+          "Désolé, la connexion au bot a un problème. Veuillez réessayer plus tard ou contactez-nous.";
         setText("");
         console.log(err);
       }
