@@ -219,7 +219,7 @@ const ChatBot = () => {
   const handlePresetQuestion = async (e: React.MouseEvent<HTMLElement>) => {
     const target = e.target as HTMLElement;
     setText("Traitement en cours....");
-    const data = { query: text };
+    const data = { query: target?.textContent };
     let result = "";
 
     try {
@@ -308,8 +308,8 @@ const ChatBot = () => {
         {isOpen && (
           <>
             <div className="flex flex-col w-full space-y-1.5 pb-4 border-b shadow-md border-none">
-              <div className="pr-2  flex items-center justify-between">
-                <h2 className="font-semibold text-lg tracking-tight">
+              <div className="px-2  flex items-center justify-between">
+                <h2 className="flex font-semibold text-lg tracking-tight items-center">
                   SmartPredict Service
                 </h2>
                 <FiMinus
@@ -375,6 +375,15 @@ const ChatBot = () => {
                             dangerouslySetInnerHTML={{ __html: message.text }}
                           />
                         </p>
+                        {message.img && (
+                          <img
+                            className="mt-5 item w-100 h-100"
+                            src={message.img}
+                            width={100}
+                            height={100}
+                            alt="Jese image"
+                          />
+                        )}
                       </div>
                       {chat?.messages?.length === 4 &&
                       index === chat?.messages?.length - 1 &&
@@ -399,7 +408,7 @@ const ChatBot = () => {
                 <input
                   className="input h-10 text-gray-700 dark:text-gray-200 text-sm p-3 focus:outline-none bg-gray-200 dark:bg-gray-700 w-full rounded-l-md"
                   type="text"
-                  placeholder="Type Messages"
+                  placeholder="Ecrire un message"
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   required
@@ -409,7 +418,7 @@ const ChatBot = () => {
                   type="submit"
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2"
                 >
-                  Send
+                  Envoyer
                 </button>
               </form>
             </div>
