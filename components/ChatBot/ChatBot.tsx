@@ -57,7 +57,7 @@ const ChatBot = () => {
   const BOT_ID = `${process.env.NEXT_PUBLIC_BOT_ID}`;
   const [formData, setFormData] = useState({ name: "", email: "" });
   const endRef = useRef<HTMLDivElement>(null);
-
+  const [phone, setPhone] = useState("+261344432719");
   const [isOpen, setIsOpen] = useState(false);
   const [isDiplayed, setIsDisplayed] = useState(true);
 
@@ -151,9 +151,6 @@ const ChatBot = () => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
-
-  const [phone, setPhone] = useState("+261344432719");
-  const [message, setMessage] = useState("Kaiza kaiza");
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
