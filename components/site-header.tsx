@@ -24,8 +24,8 @@ const headerHeight = {
 
 const Header = () => {
   const src: any = useImageTheme({
-    darkName: "/logo-dark-mode.svg",
-    lightName: "/logo-light-mode.svg",
+    darkName: "/logo-mekan.png",
+    lightName: "/logo-mekan.png",
   });
   const scrolled = useScroll(5);
   const containerRef = useRef(null);
@@ -43,7 +43,7 @@ const Header = () => {
         }
       )}
     >
-      <div className="flex w-full h-16 items-center max-w-6xl mx-auto p-6 justify-between sm:space-x-0">
+      <div className="flex w-full h-16 items-center max-w-7xl mx-auto px-2 justify-between sm:space-x-0">
         <div>
           <Image src={src} alt="SmartPredict logo" width={160} height={40} />
         </div>

@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const Advantages = () => {
   return (
-    <div className="advantages flex flex-col items-center md:items-end  w-full relative mt-20 lg:mt-[200px] space-y-10 z-20 px-32">
+    <div className="advantages bg-gray-900 p-10 z-20">
       <div className="space-y-10">
         <div className="flex flex-row py-0 md:gap-5 gap-2">
           <div className="bg-secondary/20 rounded-sm p-1 sm:w-9 w-[80px] h-9 md:w-12 md:h-12  mt-1">

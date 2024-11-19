@@ -9,56 +9,108 @@ import TheyTrusUs from "../TheyTrustUs/TheyTrusUs";
 import Team from "../Team/Team";
 // Images import
 import stacks from "../../public/image.png";
-import bgHome from "../../public/bg-home.svg";
+import bgHome from "../../public/hero_1.jpg";
+import heroBot from "../../public/hero_2.png";
+import heroMan from "../../public/hero_2_1.jpeg";
+import imgApp from "../../public/app-process.webp";
 import Services from "../Services/Services";
 import ChatBot from "../ChatBot/ChatBot";
 
 export const Home = () => {
   return (
     <>
-      <section className="banner lg:mt-[50px] sm:relative">
-        <div className="flex flex-col items-center justify-center">
-          <h1 className="text-3xl lg:text-5xl text-center text-balance">
-            Experts for your IT & Data
-          </h1>
-          <p className="mt-4 lg:text-xl text-balance text-center text-black dark:text-white">
-            Entrust your IT and data projects to our expert teams. Develop a
-            solution tailored to your needs. Focus on your core business and
-            boost your growth.
-          </p>
-          <Button size={"lg"} className="dark:bg-secondary mt-8 z-20 sm:mt-12">
-            New SmartProject
-          </Button>
-          <div
-            className="relative md:-top-[160px] -top-20 lg:-top-[270px] z-10"
-            style={{
-              position: "relative",
-              height: "100px",
-              right: "14px",
-            }}
-          >
-            <Image
-              src={bgHome}
-              style={{
-                maxWidth: "100%",
-                height: "auto",
-              }}
-              alt="SmartPredict home bg"
-              className="object-contain  z-10"
-            />
+      <section className="main">
+        <div className="flex">
+          <div className="grid py-8 mx-auto px-10 lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
+            <div className="mr-auto lg:col-span-8">
+              <h1 className="max-w-2xl mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl xl:text-6xl dark:text-white">
+                Payments tool for software companies
+              </h1>
+              <p className="max-w-2xl mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">
+                From checkout to global sales tax compliance, companies around
+                the world use Flowbite to simplify their payment stack.
+              </p>
+              <a
+                href="#"
+                className="inline-flex items-center justify-center px-5 py-3 mr-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-900"
+              >
+                Get started
+                <svg
+                  className="w-5 h-5 ml-2 -mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+              </a>
+              <a
+                href="#"
+                className="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
+              >
+                Speak to Sales
+              </a>
+            </div>
+            <div className="hidden rotate-6 lg:mt-0 lg:col-span-4 lg:flex">
+              <Image
+                src={heroBot}
+                style={{
+                  maxWidth: "100%",
+                  height: "100%",
+                }}
+                className="drop-shadow-2xl"
+                alt="Hero home bg"
+              />
+            </div>
           </div>
         </div>
-        <div className="sm:relative sm:bottom-20 md:-top-20 lg:top-0 lg:mt-52 mt-32">
-          <h2 className="relative lg:text-2xl font-bold md:text-sm z-20">
-            IT outsourcing that lives up to your expectations
-          </h2>
-          <p className="max-w-md text-pretty text-sm relative mt-6 dark:text-slate-200 z-20">
-            Thanks to our mastery of the most sought-after technologies, we can
-            offer you reliable remote services in line with International
-            standards, at attractive prices.
-          </p>
+        <div className="flex flex-row rotate-12 px-1/2 gap-20">
+          <div className="ml-auto">
+            <Image
+              src={heroMan}
+              style={{
+                width: "100%",
+              }}
+              alt="Hero home bg"
+              className="max-w-md border-4 -rotate-45 border-grey-400"
+            />
+          </div>
+          <div className="ml-auto">
+            <Image
+              src={bgHome}
+              alt="Hero home bg"
+              className="max-w-md border-4 border-red-400"
+            />
+          </div>
+          <div className="max-w-7xl ">
+            <h2 className="max-w-lg lg:text-4xl font-bold md:text-sm z-20">
+              IT outsourcing that lives up to your expectations
+            </h2>
+            <p className="max-w-md text-pretty text-sm relative mt-6 dark:text-slate-200 z-20">
+              Thanks to our mastery of the most sought-after technologies, we
+              can offer you reliable remote services in line with International
+              standards, at attractive prices.
+            </p>
+          </div>
         </div>
-        <Advantages />
+        <div className="flex w-full mt-44 px-20 gap-0">
+          <div className="ml-auto">
+          <Image
+                src={imgApp}
+                style={{
+                  maxWidth: "80%",
+                  height: "auto",
+                }}
+                className="drop-shadow-2xl"
+                alt="Hero home bg"
+              />
+          </div>
+          <Advantages />
+        </div>
       </section>
       <section className="Projects">
         <Projects />

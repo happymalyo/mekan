@@ -283,12 +283,13 @@ const ChatBot = () => {
     >
       <motion.div
         layout // Layout make the div more smooth
+        whileHover={{ scale: isOpen ? 1 : 1.2 }}
         animate={{
           borderRadius: isOpen ? 20 : 50,
         }}
         initial={{ borderRadius: 50 }}
         className={cn(
-          "w-20 h-20 bg-zinc-700 shadow-2xl cursor-pointer flex items-center justify-center",
+          "w-20 h-20 shadow-2xl cursor-pointer flex items-center justify-center",
           {
             "bot-container z-40 right-0 mr-4 text-slate-500 bg-white p-6 rounded-lg border border-[#e5e7eb] w-[440px] h-[634px] flex flex-col":
               isOpen,
@@ -306,7 +307,7 @@ const ChatBot = () => {
             <div className="flex flex-col w-full space-y-1.5 pb-4 border-b shadow-md border-none">
               <div className="px-2  flex items-center justify-between">
                 <h2 className="flex font-semibold text-lg tracking-tight items-center">
-                  SmartPredict Service
+                  MËKAN à votre service
                 </h2>
                 <FiMinus
                   className="w-8 h-8 cursor-pointer"
@@ -322,10 +323,10 @@ const ChatBot = () => {
                 <div className="space-y-2">
                   <Image
                     className="item w-10 h-10 rounded-full"
-                    src={"/favicon.ico"}
+                    src={"/bot.png"}
                     width={20}
                     height={20}
-                    alt="Jese image"
+                    alt="Logo image"
                   />
                 </div>
                 <motion.div
@@ -336,7 +337,7 @@ const ChatBot = () => {
                 >
                   <div className="flex flex-col leading-1.5 p-5 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700">
                     <p className="message text-sm font-normal text-gray-900 text-balance dark:text-white">
-                      Bonjour 👋, je suis un bot de Smartpredict. Je peux vous
+                      Bonjour 👋, je suis un bot de Mëkan. Je peux vous
                       répondre instatannement.
                     </p>
                   </div>
@@ -350,10 +351,10 @@ const ChatBot = () => {
                       <div className="space-y-2">
                         <Image
                           className="item w-10 h-10 rounded-full"
-                          src={"/favicon.ico"}
+                          src={"/bot.png"}
                           width={20}
                           height={20}
-                          alt="Jese image"
+                          alt="Logo image"
                         />
                       </div>
                     ) : (
@@ -377,7 +378,7 @@ const ChatBot = () => {
                             src={message.img}
                             width={100}
                             height={100}
-                            alt="Jese image"
+                            alt="Logo image"
                           />
                         )}
                       </div>
@@ -423,11 +424,11 @@ const ChatBot = () => {
 
         {isDiplayed && (
           <Image
-            className="item w-10 h-10 rounded-full"
-            src={"/favicon.ico"}
-            width={20}
+            className="item w-35 h-50"
+            src={"/bot.png"}
+            width={50}
             height={20}
-            alt="Jese image"
+            alt="Logo image"
           />
         )}
       </motion.div>
