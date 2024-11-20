@@ -47,7 +47,7 @@ export const useLeadInfos = create<LeadInfoState>((set) => ({
       try {
         await setDoc(doc(db, "users", leadId), {
           username,
-          email: "visitor@smartpredict.com",
+          email: "visitor@mekan.com",
           avatar: null,
           id: leadId,
           blocked: [],

@@ -22,7 +22,7 @@ const Advantages = () => {
               Cost Savings
             </h3>
             <p className="flex text-left text-sm sm:text-base text-balance">
-              SmartPredict Services takes charge of your IT projects, reducing
+              Mëkan Services takes charge of your IT projects, reducing
               your costs while guaranteeing a better ROI.
             </p>
           </div>

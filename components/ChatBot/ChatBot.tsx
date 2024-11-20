@@ -278,7 +278,7 @@ const ChatBot = () => {
   return (
     <div
       className={cn({
-        "fixed bottom-14 right-5 z-20": !isOpen,
+        "fixed bottom-5 right-3 z-20": !isOpen,
       })}
     >
       <motion.div

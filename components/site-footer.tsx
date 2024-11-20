@@ -109,7 +109,7 @@ const Footer = () => {
               <li className="mb-4">
                 <a href="#" target="_blank" className="flex text-sm">
                   <Mail className="mr-2" />
-                  contact@smartpredictservices.com
+                  contact@mekanservices.com
                 </a>
               </li>
               <li className="mb-4 flex">
@@ -134,7 +134,7 @@ const Footer = () => {
         <div className="py-0 md:py-6 sm:py-5 flex items-center flex-col md:flex-row justify-between">
           <div className="mb-5 sm:m-0 md:flex space-x-6 mx-auto">
             <span className="hidden lg:block text-slate-600 text-center">
-              Copyright © 2024 SmartPredict Services. All rights reserved
+              Copyright © 2024 mekan Services. All rights reserved
             </span>
             <div className="md:space-x-6 text-sm sm:text-base text-nowrap">
               <span className="text-slate-400  sm:text-center hover:underline">
@@ -162,7 +162,7 @@ const Footer = () => {
         </div>
       </div>
       <div className="flex items-center text-center text-sm sm:text-base text-balance lg:hidden text-slate-600 my-3 justify-center">
-        Copyright © 2024 SmartPredict Services. All rights reserved
+        Copyright © 2024 mekan Services. All rights reserved
       </div>
     </footer>
   );

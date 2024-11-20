@@ -4,9 +4,10 @@ import { Input } from "../ui/input";
 import Image from "next/image";
 import Testimonial from "../Testimonial/Testimonial";
 import Advantages from "./Advatanges/Advantages";
-import Projects from "../Projects/Projects";
-import TheyTrusUs from "../TheyTrustUs/TheyTrusUs";
+import Video from "../Video";
+import Mission from "../Mission";
 import Team from "../Team/Team";
+import Blog from "../Blog";
 // Images import
 import stacks from "../../public/image.png";
 import bgHome from "../../public/hero_1.jpg";
@@ -15,6 +16,7 @@ import heroMan from "../../public/hero_2_1.jpeg";
 import imgApp from "../../public/app-process.webp";
 import Services from "../Services/Services";
 import ChatBot from "../ChatBot/ChatBot";
+import ScrollToTop from "../ScrollToTop";
 
 export const Home = () => {
   return (
@@ -99,24 +101,24 @@ export const Home = () => {
         </div>
         <div className="flex w-full mt-44 px-20 gap-0">
           <div className="ml-auto">
-          <Image
-                src={imgApp}
-                style={{
-                  maxWidth: "80%",
-                  height: "auto",
-                }}
-                className="drop-shadow-2xl"
-                alt="Hero home bg"
-              />
+            <Image
+              src={imgApp}
+              style={{
+                maxWidth: "80%",
+                height: "auto",
+              }}
+              className="drop-shadow-2xl"
+              alt="Hero home bg"
+            />
           </div>
           <Advantages />
         </div>
       </section>
       <section className="Projects">
-        <Projects />
+        <Video />
       </section>
       <section className="they-trust-us">
-        <TheyTrusUs />
+        <Mission />
       </section>
 
       <section className="testimonials">
@@ -124,39 +126,14 @@ export const Home = () => {
       </section>
 
       <section className="services">
-        <Services />
+        <Blog />
       </section>
 
       <section className="teams">
         <Team />
       </section>
 
-      <section className="technologies flex flex-wrap justify-center items-center mt-20 gap-0 z-10">
-        <div className="flex flex-col items-center sm:items-start sm:w-1/3">
-          <h2 className="text-3xl mb-4">Our technologies</h2>
-          <p className="text-balance text-center sm:text-left text-muted-foreground">
-            To bring your IT project to fruition, our experts use the best
-            technology on the market.
-          </p>
-        </div>
-        <div
-          className="image sm:w-1/2 px-0"
-          style={{ position: "relative", height: "400px" }}
-        >
-          <Image
-            src={stacks}
-            quality={100}
-            style={{
-              maxWidth: "100%",
-              height: "auto",
-            }}
-            alt="Technologies"
-            className="object-fill"
-          />
-        </div>
-      </section>
-
-      <section className="newsletter relative flex justify-center w-full items-center sm:mt-15 sm:px-20 z-20">
+      <section className="pt-28 md:pt-28 lg:pt-28 relative flex justify-center w-full items-center sm:mt-15 sm:px-20 z-20">
         <div className="flex flex-col bg-slate-500/20 rounded-lg p-3 sm:p-10">
           <h2 className="ml-0 text-xl mb-4 w-full flex-grow">
             Get the latest news
@@ -185,6 +162,7 @@ export const Home = () => {
       </section>
       <section>
         <ChatBot />
+        <ScrollToTop/>
       </section>
     </>
   );

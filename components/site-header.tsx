@@ -45,7 +45,7 @@ const Header = () => {
     >
       <div className="flex w-full h-16 items-center max-w-7xl mx-auto px-2 justify-between sm:space-x-0">
         <div>
-          <Image src={src} alt="SmartPredict logo" width={160} height={40} />
+          <Image src={src} alt="Mëkan logo" width={160} height={40} />
         </div>
         <div className="flex justify-end items-center space-x-4">
           <Navbar toggleOpen={toggleOpen} />
@@ -54,7 +54,7 @@ const Header = () => {
               asChild
               className="dark:bg-secondary/20 dark:text-secondary-foreground"
             >
-              <Link href="/">New SmartProject</Link>
+              <Link href="/">New Project</Link>
             </Button>
           </nav>
           <button className="hidden lg:block">EN</button>

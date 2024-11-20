@@ -7,13 +7,14 @@ import HeaderMobile from "@/components/site-header-mobile";
 import Footer from "@/components/site-footer";
 import { cn } from "@/lib/utils";
 import { NextIntlClientProvider, useMessages } from "next-intl";
+// import "node_modules/react-modal-video/scss/modal-video.scss";
+import "../../node_modules/react-modal-video/scss/modal-video.scss";
 
 const manrope = Manrope({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "SmartPredict Services",
-  description:
-    "Entrust your IT/Data projects to our teams of experts. SmartPredict-Services will work with you to develop a solution tailored to your needs.",
+  title: "Mëkan",
+  description: "Mekan",
 };
 
 export default function RootLayout({
@@ -41,7 +42,7 @@ export default function RootLayout({
           <NextIntlClientProvider locale={locale} messages={messages}>
             <div className="relative flex min-h-screen flex-col">
               <Header />
-              <HeaderMobile/>
+              <HeaderMobile />
               <div className="flex-1">{children}</div>
               <Footer />
             </div>
