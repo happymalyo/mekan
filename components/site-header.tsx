@@ -9,18 +9,6 @@ import Image from "next/image";
 import useImageTheme from "@/hooks/use-image-theme";
 import { cn } from "@/lib/utils";
 import useScroll from "@/hooks/use-scroll";
-import { motion } from "framer-motion";
-import { servicesList } from "@/components/Navbar/NavList/ServicesList";
-
-const headerHeight = {
-  open: {
-    clipPath: "inset(0 0 0 0)",
-    paddingBottom: "100px",
-  },
-  closed: {
-    clipPath: "inset(0 0 200px 0)",
-  },
-};
 
 const Header = () => {
   const src: any = useImageTheme({
@@ -29,12 +17,9 @@ const Header = () => {
   });
   const scrolled = useScroll(5);
   const containerRef = useRef(null);
-  const [isOpen, toggleOpen] = useState(false);
 
   return (
-    <motion.div
-      initial={false}
-      animate={isOpen ? "open" : "closed"}
+    <div
       ref={containerRef}
       className={cn(
         "sticky inset-x-0 top-0 z-30 w-full transition-all mt-[20px]",
@@ -48,7 +33,7 @@ const Header = () => {
           <Image src={src} alt="Mëkan logo" width={160} height={40} />
         </div>
         <div className="flex justify-end items-center space-x-4">
-          <Navbar toggleOpen={toggleOpen} />
+          <Navbar />
           <nav className="hidden lg:block flex items-center space-x-1">
             <Button
               asChild
@@ -61,20 +46,7 @@ const Header = () => {
           <ThemeToggle className="hidden lg:block" />
         </div>
       </div>
-      <motion.div
-        variants={headerHeight}
-        className="w-full absolute transition-all inset-x-0 top-[102px]w-full bg-background/85 backdrop-blur-lg flex flex-col items-start z-20"
-        onMouseLeave={() => toggleOpen((isOpen) => !isOpen)}
-      >
-        <div className="container max-w-6xl pl-96 pt-10 hidden lg:block">
-          {servicesList.map((service, index) => (
-            <div key={index} className="flex items-center gap-4">
-              <span className="text-dark-foreground">{service.label}</span>
-            </div>
-          ))}
-        </div>
-      </motion.div>
-    </motion.div>
+    </div>
   );
 };
 

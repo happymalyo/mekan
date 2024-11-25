@@ -17,13 +17,15 @@ import imgApp from "../../public/app-process.webp";
 import Services from "../Services/Services";
 import ChatBot from "../ChatBot/ChatBot";
 import ScrollToTop from "../ScrollToTop";
+import { motion } from "framer-motion";
+import { once } from "events";
 
 export const Home = () => {
   return (
     <>
       <section className="main">
         <div className="flex">
-          <div className="grid py-8 mx-auto px-10 lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
+          <div className="grid py-8 mx-auto mt-32 mb-36 px-20 lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
             <div className="mr-auto lg:col-span-8">
               <h1 className="max-w-2xl mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl xl:text-6xl dark:text-white">
                 Payments tool for software companies
@@ -57,7 +59,13 @@ export const Home = () => {
                 Speak to Sales
               </a>
             </div>
-            <div className="hidden rotate-6 lg:mt-0 lg:col-span-4 lg:flex">
+            <motion.div
+              className="hidden rotate-6 lg:mt-0 lg:col-span-4 lg:flex"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.5, ease: "easeInOut" }}
+              viewport={{ once: true }}
+            >
               <Image
                 src={heroBot}
                 style={{
@@ -67,11 +75,16 @@ export const Home = () => {
                 className="drop-shadow-2xl"
                 alt="Hero home bg"
               />
-            </div>
+            </motion.div>
           </div>
         </div>
-        <div className="flex flex-row rotate-12 px-1/2 gap-20">
-          <div className="ml-auto">
+        <div className="flex flex-row mt-32 rotate-12 px-1/2 gap-20">
+          <motion.div
+            className="ml-auto"
+            initial={{ x: -100 }}
+            whileInView={{ x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4, ease: "easeInOut" }}
+          >
             <Image
               src={heroMan}
               style={{
@@ -80,14 +93,19 @@ export const Home = () => {
               alt="Hero home bg"
               className="max-w-md border-4 -rotate-45 border-grey-400"
             />
-          </div>
-          <div className="ml-auto">
+          </motion.div>
+          <motion.div
+            className="ml-auto"
+            initial={{ x: 100 }}
+            whileInView={{ x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4, ease: "easeInOut" }}
+          >
             <Image
               src={bgHome}
               alt="Hero home bg"
               className="max-w-md border-4 border-red-400"
             />
-          </div>
+          </motion.div>
           <div className="max-w-7xl ">
             <h2 className="max-w-lg lg:text-4xl font-bold md:text-sm z-20">
               IT outsourcing that lives up to your expectations
@@ -100,7 +118,12 @@ export const Home = () => {
           </div>
         </div>
         <div className="flex w-full mt-44 px-20 gap-0">
-          <div className="ml-auto">
+          <motion.div
+            className="ml-auto"
+            initial={{ x: -100 }}
+            whileInView={{ x: 0 }}
+            transition={{ duration: 0.6, delay: 0.75, ease: "easeInOut" }}
+          >
             <Image
               src={imgApp}
               style={{
@@ -110,13 +133,18 @@ export const Home = () => {
               className="drop-shadow-2xl"
               alt="Hero home bg"
             />
-          </div>
+          </motion.div>
           <Advantages />
         </div>
       </section>
-      <section className="Projects">
+      <motion.section
+        className="Projects"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.75, ease: "easeInOut" }}
+      >
         <Video />
-      </section>
+      </motion.section>
       <section className="they-trust-us">
         <Mission />
       </section>
@@ -129,9 +157,9 @@ export const Home = () => {
         <Blog />
       </section>
 
-      <section className="teams">
+      {/* <section className="teams">
         <Team />
-      </section>
+      </section> */}
 
       <section className="pt-28 md:pt-28 lg:pt-28 relative flex justify-center w-full items-center sm:mt-15 sm:px-20 z-20">
         <div className="flex flex-col bg-slate-500/20 rounded-lg p-3 sm:p-10">
@@ -162,7 +190,7 @@ export const Home = () => {
       </section>
       <section>
         <ChatBot />
-        <ScrollToTop/>
+        <ScrollToTop />
       </section>
     </>
   );
